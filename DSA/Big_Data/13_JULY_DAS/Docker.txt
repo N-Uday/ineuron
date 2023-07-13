@@ -1,0 +1,72 @@
+A.# YAML file
+version: '3'
+
+services:
+  web:
+    build: ./web
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+      - cache
+
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=mydatabase
+
+  cache:
+    image: redis:latest
+
+B. Python file
+import docker
+
+# Initialize Docker client
+client = docker.from_env()
+
+# Define the container to monitor
+container_name = 'my_container'
+threshold = 70  # CPU usage threshold in percentage
+
+# Monitor CPU usage and scale replicas
+def scale_containers():
+    container = client.containers.get(container_name)
+    stats = container.stats(stream=False)
+    cpu_usage = stats['cpu_stats']['cpu_usage']['total_usage']
+    cpu_limit = stats['cpu_stats']['cpu_usage']['percpu_usage']
+    cpu_percent = (cpu_usage / sum(cpu_limit)) * 100
+
+    # Scale replicas based on the threshold
+    if cpu_percent > threshold:
+        current_replicas = container.attrs['Replicas']
+        new_replicas = current_replicas + 1
+        container.update(replicas=new_replicas)
+        print(f"Scaling up. New replicas: {new_replicas}")
+    else:
+        print(f"CPU usage below threshold. No scaling needed.")
+
+# Run the scaling function
+scale_containers()
+
+# C. Bash Script
+#!/bin/bash
+
+# Registry credentials
+registry_url="your-registry-url"
+username="your-username"
+password="your-password"
+
+# Image details
+image_name="your-image-name"
+image_tag="latest"
+
+# Authenticate with the registry
+docker login -u $username -p $password $registry_url
+
+# Pull the latest version of the image
+docker pull $registry_url/$image_name:$image_tag
+
+# Run a container based on the image
+docker run -d $registry_url/$image_name:$image_tag
+
