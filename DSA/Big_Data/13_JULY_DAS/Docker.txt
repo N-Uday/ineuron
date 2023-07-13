@@ -13,12 +13,13 @@ services:
   db:
     image: mysql:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=password
       - MYSQL_DATABASE=mydatabase
 
   cache:
     image: redis:latest
 
+--------------------------------------------------------------------------------------------------------------------------------------------
 B. Python file
 import docker
 
@@ -49,16 +50,17 @@ def scale_containers():
 # Run the scaling function
 scale_containers()
 
+-----------------------------------------------------------------------------------------------------------------------------------------------
 # C. Bash Script
 #!/bin/bash
 
 # Registry credentials
 registry_url="your-registry-url"
-username="your-username"
-password="your-password"
+username="udaykumar47"
+password="password"
 
 # Image details
-image_name="your-image-name"
+image_name="backend"
 image_tag="latest"
 
 # Authenticate with the registry
